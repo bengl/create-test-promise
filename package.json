@@ -1,0 +1,28 @@
+{
+  "name": "create-test-promise",
+  "version": "1.0.0",
+  "description": "creates a promise for a single test case (originally for pitesti)",
+  "main": "index.js",
+  "scripts": {
+    "test": "standard && node test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/bengl/run-test-case.git"
+  },
+  "keywords": [
+    "test",
+    "run",
+    "test-case",
+    "pitesti"
+  ],
+  "author": "Bryan English <bryan@bryanenglish.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/bengl/run-test-case/issues"
+  },
+  "homepage": "https://github.com/bengl/run-test-case#readme",
+  "devDependencies": {
+    "standard": "^5.4.1"
+  }
+}

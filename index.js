@@ -10,7 +10,7 @@ function isFunction (f) {
 }
 
 function isPromise (p) {
-  typeof p === 'object' && isFunction(p.then)
+  return typeof p === 'object' && isFunction(p.then)
 }
 
 function safeWrap (f) {

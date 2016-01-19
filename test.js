@@ -28,4 +28,8 @@ const bad = [
 Promise.all([
   Promise.all(good),
   Promise.all(bad)
-]).catch(errHandle)
+]).then(() => {
+  console.assert(process.listeners('uncaughtException').length === 0)
+  console.log('pass')
+}).catch(errHandle)
+

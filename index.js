@@ -14,15 +14,18 @@ function isPromise (p) {
 }
 
 function safeWrap (f) {
-  let e
-  function uncaughtException (err) {
-    e = err
-  }
-  process.on('uncaughtException', uncaughtException)
-  return Promise.resolve().then(f)
-  .then(function handlePotentialUncaughtException (thing) {
-    process.removeListener('uncaughtException', uncaughtException)
-    if (e) throw e
+  return new Promise((resolve, reject) => {
+    let deListen = () => process.removeListener('uncaughtException', errHandle)
+    function errHandle (err) { // doubles as both uncaught handler and catch
+      deListen()
+      reject(err)
+    }
+    function thenHandle () {
+      deListen()
+      resolve()
+    }
+    process.on('uncaughtException', errHandle)
+    Promise.resolve().then(f).then(thenHandle, errHandle)
   })
 }
 

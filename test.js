@@ -9,7 +9,8 @@ const good = [
   createTestCase(() => Promise.resolve())(),
   createTestCase(() => Promise.resolve('foo'))(),
   createTestCase(Promise.resolve())(),
-  createTestCase(Promise.resolve('foo'))()
+  createTestCase(Promise.resolve('foo'))(),
+  createTestCase(cb => cb())()
 ]
 
 const bad = [
@@ -17,12 +18,10 @@ const bad = [
   createTestCase(() => Promise.reject('foo'))(),
   createTestCase(() => { throw new Error('foo') })(),
   createTestCase(() =>
-    new Promise(() => {
-      process.nextTick(() => {
-        throw new Error('foo')
-      })
-    })
-  )()
+    new Promise(() => { process.nextTick(() => { throw new Error('foo') }) })
+  )(),
+  createTestCase(cb => cb(new Error('foo')))(),
+  createTestCase(cb => { throw new Error('foo') })()
 ].map(p => p.then(shouldReject, () => {}))
 
 Promise.all([

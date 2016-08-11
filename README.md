@@ -3,8 +3,13 @@
 Creates a function that returns a promise whose resultant state is dependent on
 whether the included code throws or rejects.
 
-You can pass in a Promise, a function that returns a Promise, or a function that
-either throws or doesn't.
+You can pass in a any of the folloing:
+
+* a Promise
+* a function taking 0 arguments that returns a Promise
+* a function taking 0 arguments that either throws or doesn't
+* a function taking 1 argument, a callback, that fails when passed an argument
+in the callback.
 
 Currently, this library doesn't support nodebacks/callback-chains, but you can
 just use the Promise constructor to help with non-Promise code.
@@ -30,6 +35,12 @@ Promise.all([
   })(),
   test(function () {
     return Promise.reject(new Error('foo'))
+  })().then(shouldFail, noop),
+  test(function (cb) {
+    cb()
+  })(),
+  test(function (cb) {
+    cb(new Error('foo'))
   })().then(shouldFail, noop)
 ]).catch(function(e){
   console.error(e.stack)

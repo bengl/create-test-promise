@@ -5,15 +5,14 @@ See LICENSE.txt
 */
 'use strict'
 
-function isFunction (f) {
-  return typeof f === 'function'
-}
+const isFunction = f => typeof f === 'function'
+const isPromise = p => typeof p === 'object' && isFunction(p.then)
 
-function isPromise (p) {
-  return typeof p === 'object' && isFunction(p.then)
-}
+const promisify = f =>
+  new Promise((res, rej) => f(err => err ? rej(err) : res()))
 
 function safeWrap (f) {
+  if (isPromise(f)) return f
   return new Promise((resolve, reject) => {
     let deListen = () => process.removeListener('uncaughtException', errHandle)
     function errHandle (err) { // doubles as both uncaught handler and catch
@@ -25,16 +24,13 @@ function safeWrap (f) {
       resolve()
     }
     process.on('uncaughtException', errHandle)
-    Promise.resolve().then(f).then(thenHandle, errHandle)
+    const result = f.length ? promisify(f) : Promise.resolve().then(f)
+    result.then(thenHandle, errHandle)
   })
 }
 
 module.exports = function createTestCase (item) {
   return function () {
-    if (isPromise(item)) {
-      return item
-    } else if (isFunction(item)) {
-      return safeWrap(item)
-    }
+    return safeWrap(item)
   }
 }

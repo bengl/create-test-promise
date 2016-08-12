@@ -14,7 +14,10 @@ const promisify = f =>
 function safeWrap (f) {
   if (isPromise(f)) return f
   return new Promise((resolve, reject) => {
-    let deListen = () => process.removeListener('uncaughtException', errHandle)
+    let deListen = () => {
+      process.removeListener('uncaughtException', errHandle)
+      process.removeListener('unhandledRejection', errHandle)
+    }
     function errHandle (err) { // doubles as both uncaught handler and catch
       deListen()
       reject(err)
@@ -24,13 +27,14 @@ function safeWrap (f) {
       resolve()
     }
     process.on('uncaughtException', errHandle)
+    process.on('unhandledRejection', errHandle)
     const result = f.length ? promisify(f) : Promise.resolve().then(f)
-    result.then(thenHandle, errHandle)
+    result
+    // .then(_=>new Promise(res=>setImmediate(res)))
+    .then(thenHandle, errHandle)
   })
 }
 
 module.exports = function createTestCase (item) {
-  return function () {
-    return safeWrap(item)
-  }
+  return () => safeWrap(item)
 }

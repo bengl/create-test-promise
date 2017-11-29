@@ -11,6 +11,12 @@ You can pass in a any of the folloing:
 * a function taking 1 argument, a callback, that fails when passed an argument
 in the callback.
 
+You can pass in a second parameter, an options object, with the following option
+property:
+
+* **`timeout`**: number of milliseconds after which to time the test out.
+  Default is `Infinity`.
+
 ## Examples
 
 ```js
@@ -38,7 +44,10 @@ Promise.all([
   })(),
   test(function (cb) {
     cb(new Error('foo'))
-  })().then(shouldFail, noop)
+  })().then(shouldFail, noop),
+  test(function (cb) {
+    setTimeout(cb, 10)  
+  }, { timeout: 100 })
 ]).catch(function(e){
   console.error(e.stack)
   console.error('none of these should have failed!')

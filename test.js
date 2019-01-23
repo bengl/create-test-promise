@@ -16,9 +16,12 @@ const good = [
   createTestCase(cb => setTimeout(cb, 50), { timeout: 100 })
 ];
 
+const rejecting = Promise.reject(new Error('foo'));
+rejecting.catch(() => { /* avoid unhandled rejection warnings */ });
+
 const bad = [
-  createTestCase(Promise.reject(new Error('foo'))),
-  createTestCase(() => Promise.reject(new Error('foo'))),
+  createTestCase(rejecting),
+  createTestCase(() => rejecting),
   createTestCase(() => { throw new Error('foo'); }),
   createTestCase(() =>
     new Promise(() => { process.nextTick(() => { throw new Error('foo'); }); })

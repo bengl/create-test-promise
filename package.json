@@ -4,7 +4,7 @@
   "description": "creates a promise for a single test case (originally for pitesti)",
   "main": "index.js",
   "scripts": {
-    "test": "standard && node test"
+    "test": "semistandard && node test"
   },
   "repository": {
     "type": "git",
@@ -23,6 +23,6 @@
   },
   "homepage": "https://github.com/bengl/run-test-case#readme",
   "devDependencies": {
-    "standard": "^5.4.1"
+    "semistandard": "^13.0.1"
   }
 }

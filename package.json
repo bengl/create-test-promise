@@ -1,6 +1,6 @@
 {
   "name": "create-test-promise",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "creates a promise for a single test case (originally for pitesti)",
   "main": "index.js",
   "scripts": {

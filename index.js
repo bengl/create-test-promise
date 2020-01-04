@@ -8,7 +8,7 @@ See LICENSE.txt
 const isFunction = f => typeof f === 'function';
 const isPromise = p => typeof p === 'object' && isFunction(p.then);
 
-const promisify = f =>
+const promisify = f => () =>
   new Promise((resolve, reject) => f(err => err ? reject(err) : resolve()));
 
 const timeLimit = (promise, t) =>
@@ -20,18 +20,24 @@ const timeLimit = (promise, t) =>
   ]);
 
 function safeWrap (f, opts = {}) {
-  const p = isPromise(f) ? f : new Promise((resolve, reject) => {
-    process.on('uncaughtException', errFn);
-    (f.length ? promisify(f) : Promise.resolve().then(f)).then(thenFn, errFn);
-    function errFn (err) { // doubles as both uncaught handler and catch
-      process.removeListener('uncaughtException', errFn);
-      reject(err);
+  let p = f;
+  if (!isPromise(f)) {
+    if (f.length) {
+      f = promisify(f);
     }
-    function thenFn () {
-      process.removeListener('uncaughtException', errFn);
-      resolve();
-    }
-  });
+    p = new Promise((resolve, reject) => {
+      process.on('uncaughtException', errFn);
+      (async () => f())().then(thenFn, errFn);
+      function errFn (err) { // doubles as both uncaught handler and catch
+        process.removeListener('uncaughtException', errFn);
+        reject(err);
+      }
+      function thenFn () {
+        process.removeListener('uncaughtException', errFn);
+        resolve();
+      }
+    });
+  }
   return opts.timeout ? timeLimit(p, opts.timeout) : p;
 }
 

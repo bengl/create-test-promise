@@ -23,6 +23,6 @@
   },
   "homepage": "https://github.com/bengl/create-test-promise#readme",
   "devDependencies": {
-    "semistandard": "^13.0.1"
+    "semistandard": "^14.2.0"
   }
 }

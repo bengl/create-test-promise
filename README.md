@@ -17,6 +17,9 @@ property:
 * **`timeout`**: number of milliseconds after which to time the test out.
   Default is `Infinity`.
 
+> **NOTE:** This library is implemented using `async`/`await` syntax, so you'll
+> need to use a JavaScript environment supporting at least that.
+
 ## Examples
 
 ```js

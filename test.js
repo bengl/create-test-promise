@@ -2,9 +2,6 @@
 
 const createTestCase = require('./index');
 
-const errHandle = e => console.log(e.stack) && process.exit(1);
-const shouldReject = () => console.log((new Error('should have rejected')).stack) && process.exit(1);
-
 const good = [
   createTestCase(() => {}),
   createTestCase(() => 'foo'),
@@ -31,12 +28,29 @@ const bad = [
   createTestCase(cb => setTimeout(cb, 100), { timeout: 50 })
 ];
 
-good.reduce((accum, curr) =>
-  accum.then(() => curr()), Promise.resolve())
-  .then(() => bad.reduce((accum, curr) =>
-    accum.then(() => curr()).then(shouldReject, () => {}), Promise.resolve()))
-  .then(() => new Promise(resolve => setTimeout(resolve, 51))) // for timed tests
-  .then(() => {
-    console.assert(process.listeners('uncaughtException').length === 0);
-    console.log('pass');
-  }).catch(errHandle);
+(async () => {
+  for (const goodCase of good) {
+    await goodCase();
+    console.count('good');
+  }
+
+  for (const badCase of bad) {
+    let err;
+    try {
+      await badCase();
+    } catch (e) {
+      console.count('bad');
+      err = e;
+    }
+    if (!err) {
+      throw new Error('should have rejected');
+    }
+  }
+
+  await new Promise(resolve => setTimeout(resolve, 51)); // for timed tests
+  console.assert(process.listeners('uncaughtException').length === 0);
+  console.log('pass');
+})().catch(e => {
+  console.log(e.stack);
+  process.exit(1);
+});

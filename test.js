@@ -16,12 +16,20 @@ const good = [
 const rejecting = Promise.reject(new Error('foo'));
 rejecting.catch(() => { /* avoid unhandled rejection warnings */ });
 
+function nextTick (fn) {
+  if (typeof window !== 'undefined') {
+    window.queueMicrotask(fn);
+  } else {
+    process.nextTick(fn);
+  }
+}
+
 const bad = [
   createTestCase(rejecting),
   createTestCase(() => rejecting),
   createTestCase(() => { throw new Error('foo'); }),
   createTestCase(() =>
-    new Promise(() => { process.nextTick(() => { throw new Error('foo'); }); })
+    new Promise(() => { nextTick(() => { throw new Error('foo'); }); })
   ),
   createTestCase(cb => cb(new Error('foo'))),
   createTestCase(cb => { throw new Error('foo'); }),
@@ -48,9 +56,21 @@ const bad = [
   }
 
   await new Promise(resolve => setTimeout(resolve, 51)); // for timed tests
-  console.assert(process.listeners('uncaughtException').length === 0);
+  if (typeof window === 'undefined') {
+    // TODO is there a way of checking this in browsers?
+    console.assert(process.listeners('uncaughtException').length === 0);
+  }
   console.log('pass');
+  setExitCode(0);
 })().catch(e => {
   console.log(e.stack);
-  process.exit(1);
+  setExitCode(1);
 });
+
+function setExitCode (code) {
+  if (typeof window !== 'undefined') {
+    window.exitCode = code;
+  } else {
+    process.exitCode = code;
+  }
+}

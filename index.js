@@ -22,6 +22,22 @@ const timeLimit = (promise, t) =>
     )
   ]);
 
+function addErrorListener (fn) {
+  if (typeof window !== 'undefined') {
+    window.addEventListener('error', fn);
+  } else {
+    process.on('uncaughtException', fn);
+  }
+}
+
+function removeErrorListener (fn) {
+  if (typeof window !== 'undefined') {
+    window.removeEventListener('error', fn);
+  } else {
+    process.removeListener('uncaughtException', fn);
+  }
+}
+
 function safeWrap (f, opts = {}) {
   let p = f;
   if (!isPromise(f)) { // If it's not already a promise, we need to make one.
@@ -33,7 +49,7 @@ function safeWrap (f, opts = {}) {
     p = new Promise((resolve, reject) => {
       // We'll set this uncaught exception handler to deal with any deferred
       // execution that still might happen before the promise fullfills.
-      process.on('uncaughtException', errFn);
+      addErrorListener(errFn);
       // This bit does almost everything. We've already got a function `f` that
       // returns a promise, but if anything throws in the initial Promise, or in
       // the function itself, then there's nothing to catch it. By wrapping it
@@ -44,11 +60,11 @@ function safeWrap (f, opts = {}) {
       // `uncaughtException` handler. Because of that, we have these wrapper
       // functions around `resolve` and `reject`.
       function errFn (err) { // doubles as both uncaught handler and catch
-        process.removeListener('uncaughtException', errFn);
+        removeErrorListener(errFn);
         reject(err);
       }
       function thenFn () {
-        process.removeListener('uncaughtException', errFn);
+        removeErrorListener(errFn);
         resolve();
       }
     });
